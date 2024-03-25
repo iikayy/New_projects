@@ -4,8 +4,13 @@ from art import logo
 print(logo)
 print("Welcome to a game of Rock, Paper, Scissors")
 
+computer_score = 0
+player_score = 0
+
 
 def play_game():
+
+    global player_score, computer_score
     game_on = True
     while game_on:
 
@@ -14,27 +19,54 @@ def play_game():
         computer_choice = random.choice(decision)
 
         if player_choice == computer_choice:
-            print(f"It's a tie\nComputer chose: {computer_choice}"
-                  f" \nYou chose: {player_choice}")
+            print(f"Computer chose: {computer_choice}")
+            print(f"Computer_score is {computer_score}\nPlayer_score is {player_score}")
+
         elif player_choice == "Rock":
             print(f"Computer chose: {computer_choice}")
-            print("You win!!!\n Rock beats Scissors") if computer_choice == "Scissors" else print("You lose!!!\n Paper beats Rock")
+            if computer_choice == "Scissors":
+                player_score += 1
+                print("Rock beats Scissors")
+                print(f"Computer_score is {computer_score}\nPlayer_score is {player_score}")
+            else:
+                computer_score += 1
+                print("Paper beats Rock")
+                print(f"Computer_score is {computer_score}\nPlayer_score is {player_score}")
+
         elif player_choice == "Paper":
             print(f"Computer chose: {computer_choice}")
-            print("You win!!!\n Paper beats Rock") if computer_choice == "Rock" else print("You lose!!!\n Scissors beats Paper")
+            if computer_choice == "Rock":
+                player_score += 1
+                print("Paper beats Rock")
+                print(f"Computer_score is {computer_score}\nPlayer_score is {player_score}")
+            else:
+                computer_score += 1
+                print("Scissors beats Paper")
+                print(f"Computer_score is {computer_score}\nPlayer_score is {player_score}")
+
         elif player_choice == "Scissors":
             print(f"Computer chose: {computer_choice}")
-            print("You win!!!\n Scissors beats paper") if computer_choice == "Paper" else print("You lose!!!\n Rock beats Scissors")
+            if computer_choice == "Paper":
+                player_score += 1
+                print("Scissors beats paper")
+                print(f"Computer_score is {computer_score}\nPlayer_score is {player_score}")
+            else:
+                computer_score += 1
+                print("Rock beats Scissors")
+                print(f"Computer_score is {computer_score}\nPlayer_score is {player_score}")
 
         continue_game = input("Do you want to continue (yes or no?) : ")
         if continue_game == "yes":
             play_game()
         else:
-            print("Goodbye!!!")
+            print(f"Computer_score is {computer_score}\nPlayer_score is {player_score}")
+            if computer_score > player_score:
+                print("Computer won the game!!!")
+            elif computer_score == player_score:
+                print("It's a tie!!!")
+            else:
+                print("Congratulations, you won the game!!!")
         game_on = False
 
 
 play_game()
-
-
-
