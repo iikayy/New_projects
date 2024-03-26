@@ -1,5 +1,6 @@
 import random
 from art import logo
+import os
 
 print(logo)
 print("Welcome to a game of Rock, Paper, Scissors")
@@ -65,8 +66,23 @@ def play_game():
             elif computer_score == player_score:
                 print("It's a tie!!!")
             else:
-                print("Congratulations, you won the game!!!")
+                print("You won the game!!!")
         game_on = False
 
+        restart_game = input("Do you want to restart the game (yes or no?) : ")
+        if restart_game == "yes":
+            print(logo)
+            print("Welcome to a game of Rock, Paper, Scissors")
+            computer_score = 0
+            player_score = 0
+            play_game()
 
-play_game()
+        elif restart_game == "no":
+            print("See you soon!!!")
+            os._exit(0)
+
+
+
+
+
+
