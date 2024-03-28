@@ -72,7 +72,7 @@ def play_game():
         restart_game = input("Do you want to restart the game (yes or no?) : ")
         if restart_game == "yes":
             print(logo)
-            print("Welcome to a game of Rock, Paper, Scissors")
+            print('Welcome to a game of Rock, Paper, Scissors')
             computer_score = 0
             player_score = 0
             play_game()
@@ -80,6 +80,9 @@ def play_game():
         elif restart_game == "no":
             print("See you soon!!!")
             os._exit(0)
+
+play_game()
+
 
 
 
