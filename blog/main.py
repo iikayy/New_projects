@@ -13,10 +13,10 @@ from sqlalchemy.orm import relationship
 # Import your forms from the forms.py
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 import smtplib
+import os
 
-
-MY_EMAIL = "benblacck@gmail.com"
-MY_PASSWORD = "nqaonvxsembaeazn"
+MY_EMAIL = os.environ.get('EMAIL')
+MY_PASSWORD = os.environ.get('PASSWORD')
 
 
 app = Flask(__name__)
