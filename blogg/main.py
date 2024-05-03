@@ -14,6 +14,7 @@ from sqlalchemy.orm import relationship
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 import smtplib
 import os
+import psycopg2
 
 MY_EMAIL = os.environ.get('EMAIL')
 MY_PASSWORD = os.environ.get('PASSWORD')
