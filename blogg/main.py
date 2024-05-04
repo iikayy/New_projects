@@ -1,5 +1,5 @@
 from datetime import date
-from flask import Flask, abort, render_template, redirect, url_for, flash, request
+from flask import Flask, abort, render_template, redirect, url_for, flash, request, current_app
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
 from flask_gravatar import Gravatar
@@ -14,7 +14,7 @@ from sqlalchemy.orm import relationship
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 import smtplib
 import os
-import psycopg2
+
 
 MY_EMAIL = os.environ.get('EMAIL')
 MY_PASSWORD = os.environ.get('PASSWORD')
@@ -51,6 +51,8 @@ gravatar = Gravatar(app,
 class Base(DeclarativeBase):
     pass
 
+
+app.config['ADMIN_IDS'] = [1, 4]  # IDs of admin users
 
 app.config['SQLALCHEMY_DATABASE_URI'] =f'postgresql://avnadmin:{AVIEN_PASSWORD}@pg-239d6e49-database1.h.aivencloud.com:11488/defaultdb'
 db = SQLAlchemy(model_class=Base)
@@ -107,11 +109,38 @@ with app.app_context():
 
 
 # Create an admin-only decorator
-def admin_only(f):
+# def admin_only(f):
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         if current_user.id != 1:
+#             return abort(403)
+#         return f(*args, **kwargs)
+#     return decorated_function
+
+# Create an author-only decorator
+def author_only(f):
+    @wraps(f)
+    def decorated_function(post_id):
+        post = BlogPost.query.get(post_id)  # Get the post using the ID
+        if not post:
+            abort(404)  # Post not found
+        if current_user.id != post.author_id:
+            abort(403)  # Forbidden
+        return f(post_id)
+    return decorated_function
+
+
+# Create an admin and author-only decorator
+def admin_and_author_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.id != 1:
-            return abort(403)
+        post_id = kwargs.get('post_id')  # Get the post ID from the URL parameters
+        if post_id:
+            post = BlogPost.query.get(post_id)  # Get the post using the ID
+            if not post:
+                abort(404)  # Post not found
+            if current_user.id != post.author_id and current_user.id not in current_app.config['ADMIN_IDS']:
+                return redirect(url_for('get_all_posts'))  # Redirect unauthorized users
         return f(*args, **kwargs)
     return decorated_function
 
@@ -190,10 +219,6 @@ def show_post(post_id):
     comment_form = CommentForm()
     # Only allow logged-in users to comment on posts
     if comment_form.validate_on_submit():
-        if not current_user.is_authenticated:
-            flash("You need to login or register to comment.")
-            return redirect(url_for("login"))
-
         new_comment = Comment(
             text=comment_form.comment_text.data,
             comment_author=current_user,
@@ -206,7 +231,6 @@ def show_post(post_id):
 
 # Use a decorator so only an admin user can create new posts
 @app.route("/new-post", methods=["GET", "POST"])
-@admin_only
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -226,6 +250,7 @@ def add_new_post():
 
 # Use a decorator so only an admin user can edit a post
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
+@author_only
 def edit_post(post_id):
     post = db.get_or_404(BlogPost, post_id)
     edit_form = CreatePostForm(
@@ -248,7 +273,7 @@ def edit_post(post_id):
 
 # Use a decorator so only an admin user can delete a post
 @app.route("/delete/<int:post_id>")
-@admin_only
+@admin_and_author_only
 def delete_post(post_id):
     post_to_delete = db.get_or_404(BlogPost, post_id)
     db.session.delete(post_to_delete)
