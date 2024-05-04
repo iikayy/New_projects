@@ -109,13 +109,13 @@ with app.app_context():
 
 
 # Create an admin-only decorator
-# def admin_only(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if current_user.id != 1:
-#             return abort(403)
-#         return f(*args, **kwargs)
-#     return decorated_function
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.id != 1:
+            return abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Create an author-only decorator
 def author_only(f):
@@ -273,7 +273,7 @@ def edit_post(post_id):
 
 # Use a decorator so only an admin user can delete a post
 @app.route("/delete/<int:post_id>")
-@admin_and_author_only
+@admin_only
 def delete_post(post_id):
     post_to_delete = db.get_or_404(BlogPost, post_id)
     db.session.delete(post_to_delete)
