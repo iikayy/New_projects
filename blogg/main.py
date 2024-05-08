@@ -312,6 +312,7 @@ def upload_profile():
                 }
             )
             current_user.profile_pic_url = upload_response['url']
+            db.session.add(current_user.profile_pic_url)
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('get_all_posts'))
