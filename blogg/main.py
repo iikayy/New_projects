@@ -292,25 +292,29 @@ def delete_post(post_id):
     return redirect(url_for('get_all_posts'))
 
 
-@app.route("/profile", methods=['GET', 'POST'])
+@app.route("/profile/<int:user_id>", methods=['GET', 'POST'])
 @login_required
-def upload_profile():
-    form = UpdateProfileForm()
+def update_profile(user_id):
+    profile = db.get_or_404(User, user_id)
+    form = UpdateProfileForm(
+        name=profile.name,
+        email=profile.email,
+        password=profile.password,
+        profile_pic=profile.profile_pic_url
+    )
     if form.validate_on_submit():
         hash_and_salted_password = generate_password_hash(
             form.password.data,
             method='pbkdf2:sha256',
             salt_length=8)
         # Update user information
-        user = User(
-            email=form.email.data,
-            name=form.name.data,
-            password=hash_and_salted_password,
-            profile_pic_url=form.profile_pic.data,
-        )
+        profile.name = form.name.data
+        profile.email = form.email.data
+        profile.password = hash_and_salted_password
+        profile.profile_pic_url = form.profile_pic.data
         if form.profile_pic.data:
             # Upload profile picture to ImageKit
-            upload_response = imagekit.upload(
+            imagekit.upload(
                 file=form.profile_pic.data,
                 file_name=f"user_{current_user.id}_profile_pic.jpg",
                 # options={
@@ -320,17 +324,9 @@ def upload_profile():
                 # }
             )
             # current_user.profile_pic_url = upload_response['url']
-        db.session.add(user)
         db.session.commit()
-        login_user(user)
         flash('Profile updated successfully!', 'success')
-        return redirect(url_for('get_all_posts'))
-    elif request.method == 'GET':
-        # Pre-fill form with current user data
-        form.name.data = current_user.name
-        form.email.data = current_user.email
-        form.password.data = current_user.password
-        form.profile_pic.data = current_user.profile_pic_url
+        return redirect(url_for('get_all_posts', user_id=current_user.id))
     return render_template('profile.html', form=form)
 
 
