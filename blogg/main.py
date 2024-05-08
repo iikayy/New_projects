@@ -205,7 +205,7 @@ def login():
             return redirect(url_for('login'))
         else:
             login_user(user)
-            return redirect(url_for('get_all_posts'))
+            return redirect(url_for('get_all_posts', current_user=current_user.name))
 
     return render_template("login.html", form=form, current_user=current_user)
 
