@@ -46,7 +46,7 @@
       <div class="container px-4 px-lg-5">
         <a class="navbar-brand" href="/">Let's Connect</a>
         {% if current_user.is_authenticated: %}
-        <h5 class="subheading">Welcome back {{current_user.name}}</h5>
+        <h5 class="navbar-brand"><em>Welcome back {{current_user.name}}</em></h5>
         {% endif %}
         <button
           class="navbar-toggler"
