@@ -298,8 +298,11 @@ def upload_profile():
     form = UpdateProfileForm()
     if form.validate_on_submit():
         # Update user information
-        current_user.name = form.name.data
-        current_user.email = form.email.data
+        user = User(
+            email=form.email.data,
+            name=form.name.data,
+            profile_pic_url=form.profile_pic.data,
+        )
         if form.profile_pic.data:
             # Upload profile picture to ImageKit
             upload_response = imagekit.upload(
@@ -312,7 +315,7 @@ def upload_profile():
                 }
             )
             current_user.profile_pic_url = upload_response['url']
-            db.session.add(current_user.profile_pic_url)
+        db.session.add(user)
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('get_all_posts'))
