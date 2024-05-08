@@ -1,0 +1,36 @@
+{% include "header.html" %}
+
+{% block content %}
+
+    <h1>User Profile</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <!-- CSRF Token for security -->
+        {{ form.csrf_token }}
+
+        <!-- Profile Picture -->
+        <div>
+            <label for="profile_pic">Profile Picture</label>
+            <input type="file" id="profile_pic" name="profile_pic">
+            {% if current_user.profile_pic_url %}
+                <img src="{{ current_user.profile_pic_url }}" alt="Profile Picture">
+            {% endif %}
+        </div>
+
+        <!-- Name -->
+        <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" value="{{ form.name.data }}">
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ form.email.data }}">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">Update Profile</button>
+    </form>
+
+
+{% include "footer.html" %}

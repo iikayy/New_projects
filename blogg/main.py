@@ -2,20 +2,21 @@ from datetime import date
 from flask import Flask, abort, render_template, redirect, url_for, flash, request, current_app
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
-from flask_gravatar import Gravatar
-from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
+# from flask_gravatar import Gravatar
+from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship
-# Import your forms from the forms.py
-from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, UpdateProfileForm
 import smtplib
 import os
+from imagekitio import ImageKit
 
 
+IMAGEKIT_PRIVATE_KEY = os.environ.get('IMAGEKIT_PRIVATE_KEY')
 MY_EMAIL = os.environ.get('EMAIL')
 MY_PASSWORD = os.environ.get('PASSWORD')
 AVIEN_PASSWORD = os.environ.get('AVIEN_PASSWORD')
@@ -37,15 +38,21 @@ def load_user(user_id):
 
 
 # For adding profile images to the comment section
-gravatar = Gravatar(app,
-                    size=100,
-                    rating='g',
-                    default='retro',
-                    force_default=False,
-                    force_lower=False,
-                    use_ssl=False,
-                    base_url=None)
+# gravatar = Gravatar(app,
+#                     size=100,
+#                     rating='g',
+#                     default='retro',
+#                     force_default=False,
+#                     force_lower=False,
+#                     use_ssl=False,
+#                     base_url=None)
 
+# Initialize imageKit SDK
+imagekit = ImageKit(
+    private_key=IMAGEKIT_PRIVATE_KEY,
+    public_key='public_fOFPZvhBmREFPjnl1Zka4VsdjAo=',
+    url_endpoint='https://ik.imagekit.io/pwroigzp3'
+)
 
 # CREATE DATABASE
 class Base(DeclarativeBase):
@@ -88,6 +95,7 @@ class User(UserMixin, db.Model):
     posts = relationship("BlogPost", back_populates="author")
     # Parent relationship: "comment_author" refers to the comment_author property in the Comment class.
     comments = relationship("Comment", back_populates="comment_author")
+    profile_pic_url = db.Column(db.String(255))  # Store ImageKit profile picture URL
 
 
 # Create a table for the comments on the blog posts
@@ -282,6 +290,36 @@ def delete_post(post_id):
     db.session.delete(post_to_delete)
     db.session.commit()
     return redirect(url_for('get_all_posts'))
+
+
+@app.route("/profile", methods=['GET', 'POST'])
+@login_required
+def upload_profile():
+    form = UpdateProfileForm()
+    if form.validate_on_submit():
+        # Update user information
+        current_user.name = form.name.data
+        current_user.email = form.email.data
+        if form.profile_pic.data:
+            # Upload profile picture to ImageKit
+            upload_response = imagekit.upload(
+                file=form.profile_pic.data,
+                file_name=f"user_{current_user.id}_profile_pic.jpg",
+                options={
+                    "folder": "/profile_pictures/",
+                    "public_id": f"user_{current_user.id}_profile_pic",
+                    "tags": ["profile_pic"]
+                }
+            )
+            current_user.profile_pic_url = upload_response['url']
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('profile'))
+    elif request.method == 'GET':
+        # Pre-fill form with current user data
+        form.name.data = current_user.name
+        form.email.data = current_user.email
+    return render_template('profile.html', form=form)
 
 
 @app.route("/about")
