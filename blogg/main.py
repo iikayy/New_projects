@@ -14,6 +14,7 @@ from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, UpdatePr
 import smtplib
 import os
 from imagekitio import ImageKit
+from werkzeug.utils import secure_filename
 
 
 IMAGEKIT_PRIVATE_KEY = os.environ.get('IMAGEKIT_PRIVATE_KEY')
@@ -24,6 +25,7 @@ AVIEN_PASSWORD = os.environ.get('AVIEN_PASSWORD')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['UPLOAD_FOLDER'] = 'static/uploads/profile_pics'
 ckeditor = CKEditor(app)
 Bootstrap5(app)
 
@@ -311,20 +313,21 @@ def update_profile(user_id):
         profile.name = form.name.data
         profile.email = form.email.data
         profile.password = hash_and_salted_password
-        profile.profile_pic_url = form.profile_pic.data
+        # profile.profile_pic_url = form.profile_pic.data
         if form.profile_pic.data:
             # Upload profile picture to ImageKit
-            imagekit.upload(
-                file=form.profile_pic.data,
-                file_name=f"user_{current_user.id}_profile_pic.jpg",
-                # options={
-                #     "folder": "/profile_pictures/",
-                #     "public_id": f"user_{current_user.id}_profile_pic",
-                #     "tags": ["profile_pic"]
-                # }
+            filename = secure_filename(form.profile_pic.data.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            form.profile_pic.data.save(filepath)
+            uploaded_file = imagekit.upload(
+                file=filepath,
+                file_name=filename,
             )
-            # current_user.profile_pic_url = upload_response['url']
-        db.session.commit()
+            profile.profile_pic_url = uploaded_file['url']
+            db.session.commit()
+            # Optionally, delete the local file after upload
+            os.remove(filepath)
+            return 'File uploaded successfully'
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('get_all_posts', user_id=current_user.id))
     return render_template('profile.html', form=form)
