@@ -320,7 +320,7 @@ def update_profile(user_id):
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             form.profile_pic.data.save(filepath)
             uploaded_file = imagekit.upload(
-                file=filepath,
+                file=open(filepath, 'rb'),
                 file_name=filename,
             )
             profile.profile_pic_url = uploaded_file['url']
