@@ -314,7 +314,7 @@ def upload_profile():
             current_user.profile_pic_url = upload_response['url']
         db.session.commit()
         flash('Profile updated successfully!', 'success')
-        return redirect(url_for('profile'))
+        return redirect(url_for('get_all_posts'))
     elif request.method == 'GET':
         # Pre-fill form with current user data
         form.name.data = current_user.name
