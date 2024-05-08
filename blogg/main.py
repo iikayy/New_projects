@@ -308,13 +308,13 @@ def upload_profile():
             upload_response = imagekit.upload(
                 file=form.profile_pic.data,
                 file_name=f"user_{current_user.id}_profile_pic.jpg",
-                options={
-                    "folder": "/profile_pictures/",
-                    "public_id": f"user_{current_user.id}_profile_pic",
-                    "tags": ["profile_pic"]
-                }
+                # options={
+                #     "folder": "/profile_pictures/",
+                #     "public_id": f"user_{current_user.id}_profile_pic",
+                #     "tags": ["profile_pic"]
+                # }
             )
-            current_user.profile_pic_url = upload_response['url']
+            # current_user.profile_pic_url = upload_response['url']
         db.session.add(user)
         db.session.commit()
         flash('Profile updated successfully!', 'success')
@@ -323,6 +323,7 @@ def upload_profile():
         # Pre-fill form with current user data
         form.name.data = current_user.name
         form.email.data = current_user.email
+        form.profile_pic.data = current_user.profile_pic_url
     return render_template('profile.html', form=form)
 
 
