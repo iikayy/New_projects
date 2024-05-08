@@ -2,7 +2,6 @@
 {% include "header.html" %}
 {% block content %}
 
-{% if current_user.is_authenticated: %}
 <header
   class="masthead"
   style="background-image: url('../static/assets/img/edit-bg.jpg')"
@@ -48,7 +47,6 @@
         <button type="submit">Update Profile</button>
     </form>
 
-{% endif %}
 
 
 {% include "footer.html" %}
