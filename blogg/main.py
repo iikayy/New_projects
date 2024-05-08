@@ -95,7 +95,7 @@ class User(UserMixin, db.Model):
     posts = relationship("BlogPost", back_populates="author")
     # Parent relationship: "comment_author" refers to the comment_author property in the Comment class.
     comments = relationship("Comment", back_populates="comment_author")
-    profile_pic_url = db.Column(db.String(255))  # Store ImageKit profile picture URL
+    profile_pic_url: Mapped[str] = mapped_column(String(300))  # Store ImageKit profile picture URL
 
 
 # Create a table for the comments on the blog posts

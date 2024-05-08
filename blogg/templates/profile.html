@@ -1,8 +1,24 @@
+{% from "bootstrap5/form.html" import render_form %}
 {% include "header.html" %}
-
 {% block content %}
 
-    <h1>User Profile</h1>
+{% if current_user.is_authenticated: %}
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/edit-bg.jpg')"
+>
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="page-heading">
+          <h1>User Profile</h1>
+          <span class="subheading">Update your profile!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
     <form method="POST" enctype="multipart/form-data">
         <!-- CSRF Token for security -->
         {{ form.csrf_token }}
@@ -31,6 +47,8 @@
         <!-- Submit Button -->
         <button type="submit">Update Profile</button>
     </form>
+
+{% endif %}
 
 
 {% include "footer.html" %}
