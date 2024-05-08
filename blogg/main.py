@@ -327,7 +327,7 @@ def update_profile(user_id):
             db.session.commit()
             # Optionally, delete the local file after upload
             os.remove(filepath)
-            return 'File uploaded successfully'
+            # return 'File uploaded successfully'
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('get_all_posts', user_id=current_user.id))
     return render_template('profile.html', form=form)
