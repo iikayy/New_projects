@@ -297,10 +297,15 @@ def delete_post(post_id):
 def upload_profile():
     form = UpdateProfileForm()
     if form.validate_on_submit():
+        hash_and_salted_password = generate_password_hash(
+            form.password.data,
+            method='pbkdf2:sha256',
+            salt_length=8)
         # Update user information
         user = User(
             email=form.email.data,
             name=form.name.data,
+            password=hash_and_salted_password,
             profile_pic_url=form.profile_pic.data,
         )
         if form.profile_pic.data:
@@ -317,12 +322,14 @@ def upload_profile():
             # current_user.profile_pic_url = upload_response['url']
         db.session.add(user)
         db.session.commit()
+        login_user(user)
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('get_all_posts'))
     elif request.method == 'GET':
         # Pre-fill form with current user data
         form.name.data = current_user.name
         form.email.data = current_user.email
+        form.password.data = current_user.password
         form.profile_pic.data = current_user.profile_pic_url
     return render_template('profile.html', form=form)
 

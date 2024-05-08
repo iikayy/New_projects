@@ -37,6 +37,7 @@ class CommentForm(FlaskForm):
 # Create a form to upload profile picture
 class UpdateProfileForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=100)])
+    password = PasswordField("Password", validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
     profile_pic = FileField('Profile Picture')
     submit = SubmitField("Submit!")
