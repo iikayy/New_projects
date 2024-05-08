@@ -323,7 +323,7 @@ def update_profile(user_id):
                 file=open(filepath, 'rb'),
                 file_name=filename,
             )
-            profile.profile_pic_url = uploaded_file['url']
+            profile.profile_pic_url = uploaded_file.url
             db.session.commit()
             # Optionally, delete the local file after upload
             os.remove(filepath)
