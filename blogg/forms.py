@@ -39,4 +39,5 @@ class UpdateProfileForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=100)])
     email = StringField('Email', validators=[DataRequired()])
     profile_pic = FileField('Profile Picture')
+    submit = SubmitField("Submit!")
 
