@@ -61,7 +61,7 @@
             {% for comment in post.comments: %}
             <li>
               <div class="commenterImage">
-                  <img src="{{ comment.current_user.profile_pic_url }}" alt="Profile Picture"/>
+                  <img src="{{ comment.comment_author.profile_pic_url }}" alt="Profile Picture"/>
               </div>
               <div class="commentText">
                 {{comment.text|safe}}
