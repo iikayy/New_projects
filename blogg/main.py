@@ -10,7 +10,7 @@ from sqlalchemy import Integer, String, Text
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship
-from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, UpdateProfileForm
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, UpdateProfileForm, ChangePasswordForm
 import smtplib
 import os
 from imagekitio import ImageKit
@@ -301,18 +301,12 @@ def update_profile(user_id):
     form = UpdateProfileForm(
         name=profile.name,
         email=profile.email,
-        password=profile.password,
         profile_pic=profile.profile_pic_url
     )
     if form.validate_on_submit():
-        hash_and_salted_password = generate_password_hash(
-            form.password.data,
-            method='pbkdf2:sha256',
-            salt_length=8)
         # Update user information
         profile.name = form.name.data
         profile.email = form.email.data
-        profile.password = hash_and_salted_password
         # profile.profile_pic_url = form.profile_pic.data
         if form.profile_pic.data:
             # Upload profile picture to ImageKit
@@ -330,6 +324,27 @@ def update_profile(user_id):
             # return 'Profile updated successfully'
         return redirect(url_for('get_all_posts', user_id=current_user.id))
     return render_template('profile.html', form=form)
+
+
+@app.route("/password/<int:user_id>", methods=['GET', 'POST'])
+@login_required
+def update_password(user_id):
+    get_password = db.get_or_404(User, user_id)
+    form = ChangePasswordForm(
+        password=get_password
+    )
+    if form.validate_on_submit():
+        hash_and_salted_password = generate_password_hash(
+            form.password.data,
+            method='pbkdf2:sha256',
+            salt_length=8)
+        # Update password
+        get_password.password = hash_and_salted_password
+        db.session.commit()
+        return redirect(url_for('get_all_posts', user_id=current_user.id))
+    return render_template('password.html', form=form)
+
+
 
 
 @app.route("/about")

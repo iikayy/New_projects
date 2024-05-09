@@ -34,11 +34,15 @@ class CommentForm(FlaskForm):
     submit = SubmitField("Submit Comment")
 
 
-# Create a form to upload profile picture
+# Create a form to update profile
 class UpdateProfileForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=100)])
-    password = PasswordField("Password", validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
     profile_pic = FileField('Profile Picture')
     submit = SubmitField("Submit!")
 
+
+# Create a form to change password
+class ChangePasswordForm(FlaskForm):
+    password = PasswordField("Enter new password", validators=[DataRequired()])
+    submit = SubmitField("Submit!")
