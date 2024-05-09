@@ -307,6 +307,7 @@ def update_profile(user_id):
         # Update user information
         profile.name = form.name.data
         profile.email = form.email.data
+        db.session.commit()
         # profile.profile_pic_url = form.profile_pic.data
         if form.profile_pic.data:
             # Upload profile picture to ImageKit
