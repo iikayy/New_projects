@@ -63,7 +63,7 @@ class User(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String(250), nullable=False)
     name: Mapped[str] = mapped_column(String(250), nullable=False)
     posts = relationship("GramPics", back_populates="author")
-    profile_pic_url: Mapped[str] = mapped_column(String(300))  # Store ImageKit profile picture URL
+    profile_pic_url: Mapped[str] = mapped_column(String(300), nullable=True)  # Store ImageKit profile picture URL
     # comments = relationship("Comment", back_populates="comment_author")
 
 
