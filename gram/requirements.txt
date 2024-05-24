@@ -12,3 +12,4 @@ gunicorn==21.2.0
 psycopg2-binary==2.9.9
 imagekitio
 markupsafe==2.1.5
+pymysql==1.1.1
