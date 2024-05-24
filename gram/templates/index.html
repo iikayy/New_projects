@@ -1,0 +1,55 @@
+{% include "header.html" %}
+
+        <!-- Page Header-->
+        <header class="masthead" style="background-image: url('../static/assets/img/home-bg.png')" >
+            <div class="container position-relative px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
+                        <div class="site-heading">
+                            <h1>Fashion Hub</h1>
+                            <span class="subheading">Art is a lifestyle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content-->
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    <!-- Post preview-->
+                    <hr class="my-4" />
+                    {% for pic in all_pics: %}
+                    <div class="post-preview">
+                        {% if current_user.is_authenticated and current_user.id == pic.author_id:%}
+                        <a href="{{ url_for('update_profile', user_id=current_user.id) }}">
+                            {% endif %}
+                            <img src="{{ pic.author.profile_pic_url }}" alt="Profile Picture" class="profile-pic">
+                            {{pic.author.name}}
+                        </a>
+                        <a href="#">
+                            <img height="700px" width="600px" src="{{ pic.img_url }}" class="post-img">
+                            <h3 class="post-subtitle">{{ pic.title }}</h3>
+                        </a>
+                        <p class="post-meta">
+                            <a href="#!"></a>
+                             {{pic.date}} <br>
+                            {% if current_user.is_authenticated and current_user.id == pic.author_id:%}
+                            <a href="{{url_for('delete_pic', pic_id=pic.id) }}">✘</a>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <!-- Divider-->
+                    <hr class="my-4" />
+                    {% endfor %}
+                    <!-- Post preview-->
+                    <!-- Pager-->
+                    <!-- New Post -->
+                    {% if current_user.is_authenticated: %}
+                    <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="{{ url_for('add_new_pics') }}">Upload Picture </a></div>
+                </div>
+                    {% endif %}
+            </div>
+        </div>
+
+{% include "footer.html" %}
