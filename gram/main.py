@@ -18,7 +18,7 @@ AVIEN_PASSWORD = os.environ.get('AVIEN_PASSWORD')
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads/pics'
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 Bootstrap5(app)
 
 # Configure Flask-Login
@@ -46,7 +46,7 @@ class Base(DeclarativeBase):
 
 app.config['ADMIN_IDS'] = [1]  # IDs of admin users
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pics.db'
-app.config['SQLALCHEMY_DATABASE_URI'] =f'postgresql://avnadmin:{AVIEN_PASSWORD}@pg-239d6e49-database1.h.aivencloud.com:11488/defaultdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
