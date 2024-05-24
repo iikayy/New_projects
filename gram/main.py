@@ -1,3 +1,4 @@
+import pymysql
 from flask import Flask, render_template, redirect, url_for, flash, abort, current_app
 from flask_bootstrap import Bootstrap5
 from forms import RegisterForm, LoginForm, UploadPictureForm, UpdateProfileForm, ChangePasswordForm
@@ -12,6 +13,9 @@ from datetime import date
 from imagekitio import ImageKit
 from werkzeug.utils import secure_filename
 
+
+# Use PyMySQL as MySQLdb
+pymysql.install_as_MySQLdb()
 
 IMAGEKIT_PRIVATE_KEY = os.environ.get('IMAGEKIT_PRIVATE_KEY')
 AVIEN_PASSWORD = os.environ.get('AVIEN_PASSWORD')
