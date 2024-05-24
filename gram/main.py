@@ -63,7 +63,7 @@ class User(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String(250), nullable=False)
     name: Mapped[str] = mapped_column(String(250), nullable=False)
     posts = relationship("GramPics", back_populates="author")
-    profile_pic_url: Mapped[str] = mapped_column(String(300), nullable=True)  # Store ImageKit profile picture URL
+    profile_pic_url: Mapped[str] = mapped_column(String(300), nullable=False)  # Store ImageKit profile picture URL
     # comments = relationship("Comment", back_populates="comment_author")
 
 
@@ -131,13 +131,25 @@ def register():
             method='pbkdf2:sha256',
             salt_length=8
         )
+
+        # Upload profile picture to ImageKit
+        filename = secure_filename(form.profile_pic.data.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        form.profile_pic.data.save(filepath)
+        uploaded_file = imagekit.upload(
+            file=open(filepath, 'rb'),
+            file_name=filename,
+        )
+
         new_user = User(
             email=form.email.data,
             name=form.name.data,
             password=hash_and_salted_password,
+            profile_pic_url=uploaded_file.url
         )
         db.session.add(new_user)
         db.session.commit()
+        os.remove(filepath)
         # This line will authenticate the user with Flask-Login
         login_user(new_user)
         return redirect(url_for("get_all_pics"))
