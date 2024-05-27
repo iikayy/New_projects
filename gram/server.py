@@ -29,7 +29,7 @@ Bootstrap5(app)
 
 # Initialize Boto3 client for AWS S3
 s3_client = boto3.client('s3')
-BUCKET_NAME = 'mygrambuckettt1'
+BUCKET_NAME = 'grambuckettt1'
 
 
 # Configure Flask-Login
