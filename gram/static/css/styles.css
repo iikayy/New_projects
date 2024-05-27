@@ -10812,3 +10812,10 @@ header.masthead .post-heading .meta a {
     border-radius: 8px;
 }
 
+/* Adjust the size for larger screens */
+@media (min-width: 768px) {
+    .post-img {
+        width: 50%; /* Adjust this percentage to fit your desired size */
+        margin: 0 auto; /* Center the image */
+    }
+}
