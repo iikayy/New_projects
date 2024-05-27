@@ -10815,7 +10815,7 @@ header.masthead .post-heading .meta a {
 /* Adjust the size for larger screens */
 @media (min-width: 768px) {
     .post-img {
-        width: 70%; /* Adjust this percentage to fit your desired size */
-        margin: 10 auto; /* Center the image */
+        width: 50%; /* Adjust this percentage to fit your desired size */
+        margin: 20 auto; /* Center the image */
     }
 }
