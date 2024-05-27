@@ -18,7 +18,10 @@
             <div class="row gx-4 gx-lg-5 justify-content-center">
                 <div class="col-md-10 col-lg-8 col-xl-7">
                     <!-- Post preview-->
-                    <hr class="my-4" />
+                    {% if current_user.is_authenticated: %}
+                    <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="{{ url_for('add_new_pics') }}">Upload Picture </a></div>
+                </div>
+                    {% endif %}
                     {% for pic in all_pics: %}
                     <div class="post-preview">
                         {% if current_user.is_authenticated and current_user.id == pic.author_id:%}
@@ -45,10 +48,6 @@
                     <!-- Post preview-->
                     <!-- Pager-->
                     <!-- New Post -->
-                    {% if current_user.is_authenticated: %}
-                    <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href="{{ url_for('add_new_pics') }}">Upload Picture </a></div>
-                </div>
-                    {% endif %}
             </div>
         </div>
 
