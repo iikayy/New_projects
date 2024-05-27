@@ -22,6 +22,7 @@
                     <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase upload-btn" href="{{ url_for('add_new_pics') }}">Upload Picture </a></div>
                 </div>
                     {% endif %}
+                <hr class="my-4" />
                     {% for pic in all_pics: %}
                     <div class="post-preview">
                         {% if current_user.is_authenticated and current_user.id == pic.author_id:%}

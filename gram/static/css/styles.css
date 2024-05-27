@@ -10806,9 +10806,9 @@ header.masthead .post-heading .meta a {
 }
 
 .post-img {
-    width: auto;
+    width: 100%;
     height: auto;
-    max-width: auto;
+    max-width: 100%;
     border-radius: 8px;
 }
 
