@@ -54,7 +54,7 @@ def get_all_menu(db: Session = Depends(get_db)):
 
 # Route to search for a particular menu item
 @app.get("/search", response_model=MenuItem)
-def search_menu(name: str = Path(description="The name of the food in the menu"), db: Session = Depends(get_db)):
+def search_menu(name: str = Path(..., description="The name of the food in the menu"), db: Session = Depends(get_db)):
     result = db.query(Menu).filter(Menu.food_name == name.title()).first()
     if not result:
         raise HTTPException(status_code=404, detail="Menu item not found")
