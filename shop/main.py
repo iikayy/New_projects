@@ -192,8 +192,3 @@ async def logout_user():
     response = JSONResponse(content={"message": "Successfully logged out"})
     manager.set_cookie(response, "")
     return response
-
-my_key = {
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpaV9rYXl5QHlhaG9vLmNvbSIsImV4cCI6MTcxNzQyNTQxOX0.nJxq85cHVZT3KoWIb8RJLEzFRsY_SdmuW5jsF8vdhpw",
-  "token_type": "bearer"
-}
