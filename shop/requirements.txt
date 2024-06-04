@@ -3,3 +3,5 @@ sqlalchemy== 2.0.25
 fastapi_login== 1.10.0
 pydantic==2.7.2
 uvicorn==0.30.0
+passlib==1.7.4
+
