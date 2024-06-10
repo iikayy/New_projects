@@ -3,7 +3,7 @@ from database import SessionLocal, engine
 from sqlalchemy.orm import Session
 from forms import MenuItem, UpdateMenu, UpdateOrder, OrderItem, UserOut
 from models import *
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi_login import LoginManager
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
@@ -23,6 +23,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET = SECRET_KEY
 manager = LoginManager(SECRET, token_url='/login', use_cookie=True)
 manager.cookie_name = "auth"
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 # Dependency to get DB session
@@ -91,7 +93,7 @@ def update_menu(
     food_name: str = Path(description="The name of the food you want to update in the menu"),
     db: Session = Depends(get_db)
 ):
-    menu = db.query(Menu).filter(Menu.food_name == food_name).first()
+    menu = db.query(Menu).filter(Menu.food_name == food_name.title()).first()
     if not menu:
         raise HTTPException(status_code=404, detail="Menu item not found")
     for key, value in menu_update.dict(exclude_unset=True).items():
@@ -174,7 +176,7 @@ async def register_user(
 # Route to log in a user
 @app.post("/login")
 async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    email = form_data.username
+    email = form_data.email
     password = form_data.password
 
     user = get_user(email, db)

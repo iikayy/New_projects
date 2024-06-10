@@ -26,7 +26,7 @@ class Menu(Base):
     __tablename__ = "menu"
     id = Column(Integer, primary_key=True, index=True)
     food_name = Column(String(250), unique=True)
-    food_quantity = Column(String)
+    food_quantity = Column(Integer)
     food_price = Column(Float)
     food_img_url = Column(String)
     orders = relationship("Order", secondary="order_menu", back_populates="menu_items")
