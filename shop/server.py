@@ -12,8 +12,8 @@ from datetime import datetime, timedelta
 from typing import Optional
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
 
+logging.basicConfig(level=logging.DEBUG)
 
 
 # Secret key for JWT
@@ -29,7 +29,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Initialize password context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
 
@@ -155,7 +155,9 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 # Route to get all menu items
 @app.get("/menu", response_model=list[MenuItem])
-def get_all_menu(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_all_menu(db: Session = Depends(get_db),
+                 current_user: User = Depends(get_current_user)
+                 ):
     all_menu = db.query(Menu).all()
     return all_menu
 
