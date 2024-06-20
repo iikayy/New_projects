@@ -1,6 +1,8 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Float
 from sqlalchemy.orm import relationship
-from database import Base
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 
 class User(Base):
@@ -36,8 +38,5 @@ class OrderMenu(Base):
     __tablename__ = "order_menu"
     order_id = Column(Integer, ForeignKey("orders.id"), primary_key=True)
     menu_id = Column(Integer, ForeignKey("menu.id"), primary_key=True)
-
-    # def to_dict(self):
-    #     return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
