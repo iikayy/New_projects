@@ -1,3 +1,4 @@
+from functools import wraps
 from fastapi import FastAPI, Depends, HTTPException, status, Form, Path
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -21,6 +22,9 @@ security = HTTPBearer()
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
+
+# Admin ID List
+ADMIN_IDS = [1, 3]
 
 
 # Dependency to get DB session
@@ -84,6 +88,33 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     return user
 
 
+# Role-based access control decorators
+def admin_required(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        current_user: User = kwargs.get('current_user')
+        if current_user.id not in ADMIN_IDS:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin access required"
+            )
+        return await func(*args, **kwargs)
+    return wrapper
+
+
+def user_required(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        current_user: User = kwargs.get('current_user')
+        if current_user.id in ADMIN_IDS:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User access required"
+            )
+        return await func(*args, **kwargs)
+    return wrapper
+
+
 @app.post("/register", response_model=UserOut)
 async def register_user(
         email: EmailStr = Form(...),
@@ -135,19 +166,22 @@ def search_menu(name: str = Path(description="The name of the food in the menu")
                 db: Session = Depends(get_db),
                 current_user: User = Depends(get_current_user)
                 ):
-    result = db.query(Menu).filter(Menu.food_name == name.title()).first()
+    name.food_name = name.food_name.title()
+    result = db.query(Menu).filter(Menu.food_name == name).first()
     if not result:
         raise HTTPException(status_code=404, detail="Menu item not found")
     return result
 
 
 @app.post("/add", response_model=MenuItem)
-def add_new_menu_item(menu_item: MenuItem, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@admin_required
+async def add_new_menu_item(menu_item: MenuItem, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    menu_item.food_name = menu_item.food_name.title()  # Ensure the food_name is in uppercase
     if menu_item.food_name.lower() == 'string' or str(menu_item.food_img_url).lower() == 'string':
         raise HTTPException(status_code=400, detail="Enter a valid input")
     if menu_item.food_price < 1 or menu_item.food_quantity < 1:
         raise HTTPException(status_code=400, detail="Price and quantity must be greater than 1")
-    db_menu_item = db.query(Menu).filter(Menu.food_name == menu_item.food_name.title()).first()
+    db_menu_item = db.query(Menu).filter(Menu.food_name == menu_item.food_name).first()
     if db_menu_item:
         raise HTTPException(status_code=400, detail="Menu item already exists")
     new_menu_item = Menu(**menu_item.dict())
@@ -157,30 +191,34 @@ def add_new_menu_item(menu_item: MenuItem, db: Session = Depends(get_db), curren
     return new_menu_item
 
 
-@app.post("/new-order", response_model=OrderItem)
+@app.post("/new-order", response_model=dict)
 async def create_order(order_item: OrderItem, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    db_menu_item = db.query(Menu).filter(Menu.food_name == order_item.food_name.title()).first()
+    order_item.food_name = order_item.food_name.title()  # Ensure the food_name is in uppercase
+    db_menu_item = db.query(Menu).filter(Menu.food_name == order_item.food_name).first()
     if not db_menu_item:
         raise HTTPException(status_code=400, detail="Menu item not available")
     if order_item.food_name.lower() == 'string':
         raise HTTPException(status_code=400, detail="Enter a valid input")
     if order_item.quantity_ordered < 1:
         raise HTTPException(status_code=400, detail="Quantity must be greater than 1")
-    new_order = Order(**order_item.dict())
+    new_order = Order(food_name=order_item.food_name.title(), quantity_ordered=order_item.quantity_ordered, user_id=current_user.id)
     db.add(new_order)
     db.commit()
     db.refresh(new_order)
-    return new_order
+    return {"Successfully created your order": f"order_id is {new_order.id}"}
 
 
 @app.put("/update_menu/{food_name}", response_model=MenuItem)
-def update_menu(
+@admin_required
+async def update_menu(
     menu_update: UpdateMenu,
     food_name: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    menu = db.query(Menu).filter(Menu.food_name == food_name.title()).first()
+    menu_update.food_name = menu_update.food_name.title()  # Ensure the food_name is in uppercase
+    menu = db.query(Menu).filter(Menu.food_name == menu_update.food_name).first()
+
     if not menu:
         raise HTTPException(status_code=404, detail="Menu item not found")
     for key, value in menu_update.dict(exclude_unset=True).items():
@@ -198,11 +236,13 @@ def update_menu(
     return menu
 
 
-@app.put("/update_order/{food_name}", response_model=OrderItem)
-def update_order(food_name: str, order_update: UpdateOrder, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    order = db.query(Order).filter(Order.food_name == food_name.lower()).first()
+@app.put("/update_order/{order_id}", response_model=dict)
+def update_order(order_id: int, order_update: UpdateOrder, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order item not found")
+    if order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You're not allowed to update this order")
     for key, value in order_update.dict(exclude_unset=True).items():
         if key == "quantity_ordered" and value < 1:
             raise HTTPException(status_code=400, detail="Quantity must be greater than 1")
@@ -211,12 +251,16 @@ def update_order(food_name: str, order_update: UpdateOrder, db: Session = Depend
         setattr(order, key, value)
     db.commit()
     db.refresh(order)
-    return order
+    return {"Successfully updated your order": f"order_id is {order_id}"}
 
 
 @app.delete("/delete_menu/{food_name}", response_model=dict)
-def delete_menu_item(food_name: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    menu_item = db.query(Menu).filter(Menu.food_name == food_name.title()).first()
+@admin_required
+async def delete_menu_item(food_name: str = Path(description="Enter food_name"),
+                           db: Session = Depends(get_db),
+                           current_user: User = Depends(get_current_user)):
+    food_name = food_name.title()  # Ensure the food_name is in uppercase
+    menu_item = db.query(Menu).filter(Menu.food_name == food_name).first()
     if not menu_item:
         raise HTTPException(status_code=404, detail="Menu item not found")
     db.delete(menu_item)
@@ -224,13 +268,15 @@ def delete_menu_item(food_name: str, db: Session = Depends(get_db), current_user
     return {"success": "Successfully deleted the menu item"}
 
 
-@app.delete("/delete_order/{order_name}", response_model=dict)
-def delete_order(order_name: str = Path(description="The name of the food you want to delete from your order"),
+@app.delete("/delete_order/{order_id}", response_model=dict)
+def delete_order(order_id: int = Path(description="Enter order_id"),
                  db: Session = Depends(get_db),
                  current_user: User = Depends(get_current_user)):
-    order = db.query(Order).filter(Order.food_name == order_name.lower()).first()
+    order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order item not found")
+    if order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You're not allowed to delete this order")
     db.delete(order)
     db.commit()
     return {"success": "Successfully deleted the order"}
