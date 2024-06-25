@@ -7,19 +7,19 @@ jobs:
   test-python:
     # Install dependencies and run tests
     docker:
-      - image: cimg/python:3.11-node
-    working_directory: ~/project/gram
+      - image: cimg/base:2021.04
+    working_directory: ~/project/shop
     steps:
       - checkout:
-          path: ~/project
-      - python/install-packages:
-          args: --dev
-          pkg-manager: pipenv
+          path: ~/project/shop
       - run:
           name: Run tests
-          command: pipenv run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')
-      - store_test_results:
-          path: junit.xml
+          command: |
+            cd shop
+            python -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+    
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
